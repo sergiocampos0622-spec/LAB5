@@ -1,0 +1,278 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    color: #212121;
+    background-color: #f9f9f9;
+    line-height: 1.5;
+}
+
+
+header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background-color: #ffffff;
+    padding: 10px 24px;
+    border-bottom: 1px solid #e5e5e5;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+
+header > a:first-child {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+header > a:first-child img {
+    width: 32px;
+    height: 32px;
+    display: block;
+}
+
+
+header > a:first-child::after {
+    content: "YutuChafa";
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #0e4fc1;
+    font-family: Arial, sans-serif;
+}
+
+/* Barra de búsqueda */
+header form[role="search"] {
+    display: flex;
+    flex: 1;
+    max-width: 600px;
+}
+
+header form[role="search"] input[type="search"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #020202;
+    border-right: none;
+    border-radius: 20px 0 0 20px;
+    outline: none;
+}
+
+
+.navbar {
+    margin-left: auto;
+}
+
+.navbar ul {
+    display: flex;
+    gap: 16px;
+    list-style: none;
+}
+
+
+.nav-link {
+    color: #1b2a4a;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-link:hover {
+    color: #cc0000;
+}
+
+
+.btn {
+    background-color: #5515bd;
+    color: #020101;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn:hover {
+    background-color: #121111;
+}
+
+
+header form[role="search"] .btn {
+    border-radius: 0 20px 20px 0;
+    padding: 8px 18px;
+}
+
+
+.card {
+    margin-bottom: 12px;
+    padding: 8px;
+    border: 1px solid #dddddd;
+    border-radius: 6px;
+    background-color: #ffffff;
+}
+
+.card a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.card h3 {
+    font-size: 0.95rem;
+    margin-top: 6px;
+}
+
+.card p {
+    font-size: 0.85rem;
+    color: #606060;
+    margin-top: 2px;
+}
+
+
+body > main,
+body > aside {
+    display: inline-block;
+    vertical-align: top;
+}
+
+main {
+    max-width: calc(100% - 300px - 24px);
+    padding: 16px 24px;
+}
+
+
+#video-player {
+    max-width: 720px;
+    margin: 24px auto;
+}
+
+#video-player iframe {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: 8px;
+}
+
+#video-player > div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+}
+
+#video-player > div img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+#video-player > div p {
+    flex: 1;
+    font-weight: bold;
+}
+
+
+#sugeridos {
+    width: 300px;
+    background-color: #eef1f6;
+    padding: 12px;
+    vertical-align: top;
+}
+
+
+#pie {
+    background-color: #1b2a4a;
+    color: #ffffff;
+    padding: 16px;
+    text-align: center;
+}
+
+#pie ul {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    list-style: none;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+#pie a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+#pie a:hover {
+    text-decoration: underline;
+}
+
+
+#form-comentario {
+    margin: 16px 0;
+}
+
+#form-comentario label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+#form-comentario textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    margin-bottom: 8px;
+    font-family: inherit;
+}
+
+main section article {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+main section article img {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+
+main section article span {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+main section article time {
+    color: #606060;
+    font-size: 0.85rem;
+}
+
+
+h1, h2, h3 {
+    font-family: Arial, sans-serif;
+    color: #1b2a4a;
+    margin-bottom: 8px;
+}
+
+
+input[type="search"]:focus,
+textarea:focus {
+    outline: 2px solid #e8791a;
+}
+
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
