@@ -1,0 +1,272 @@
+name: Evaluacion Automatica Lab5 CSS3 UTP
+
+on: [push]
+
+jobs:
+  evaluacion-css:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descargar codigo del estudiante
+        uses: actions/checkout@v3
+
+      - name: 2. Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: 3. Instalar dependencias
+        run: |
+          pip install beautifulsoup4
+
+      - name: 4. Generar Script de Evaluacion y Anti-Plagio
+        run: |
+          cat << 'EOF' > evaluate.py
+          import os, sys, re, hashlib, json, urllib.request
+          from bs4 import BeautifulSoup
+
+          # =========================================================================
+          # CONFIGURACIÓN DIRECTA
+          # =========================================================================
+          SUPABASE_URL = "https://ikusdplwwvcbxgvevkvw.supabase.co"
+          SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrdXNkcGx3d3ZjYnhndmV2a3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5ODgyMjYsImV4cCI6MjEwNDU2NDIyNn0.TEA3ZOmZxv7zedc2hDZUaDoB0oGDVMXM2yh1M6D4YBc"
+
+          print("🔍 Iniciando evaluacion del Laboratorio #5 (HTML5 + CSS3)...\n")
+
+          score = 0
+          report = []
+
+          # 1. Verificar existencia de archivos obligatorios
+          if not os.path.exists("index.html"):
+              print("❌ ERROR CRÍTICO: No se encontró el archivo index.html.")
+              sys.exit(1)
+
+          if not os.path.exists("styles.css"):
+              print("❌ ERROR CRÍTICO: No se encontró el archivo styles.css en la raíz.")
+              sys.exit(1)
+
+          with open("index.html", "r", encoding="utf-8", errors="ignore") as f:
+              html_content = f.read()
+
+          with open("styles.css", "r", encoding="utf-8", errors="ignore") as f:
+              css_content = f.read()
+
+          soup = BeautifulSoup(html_content, "html.parser")
+
+          # ==========================================
+          # PARTE 1: SINTAXIS CSS Y COMENTARIOS (10 PTS)
+          # ==========================================
+          p1 = 0
+          # Verificar presencia de comentarios /* ... */
+          if "/*" in css_content and "*/" in css_content:
+              p1 += 5
+          else:
+              report.append("  ❌ [Parte 1] Falta al menos un comentario CSS (/* ... */) en styles.css.")
+
+          # Verificar sintaxis básica { ... }
+          if "{" in css_content and "}" in css_content and ":" in css_content:
+              p1 += 5
+          else:
+              report.append("  ❌ [Parte 1] Sintaxis CSS inválida o archivo styles.css vacío.")
+
+          score += p1
+          print(f"1. Sintaxis CSS y Comentarios: {p1}/10 pts")
+
+          # ==========================================
+          # PARTE 2: INTEGRACIÓN EXCLUSIVA VÍA <LINK> (15 PTS)
+          # ==========================================
+          p2 = 0
+          # Verificar <link rel="stylesheet" href="styles.css">
+          link_tag = soup.find("link", attrs={"rel": "stylesheet"})
+          if link_tag and link_tag.get("href") == "styles.css":
+              p2 += 10
+          else:
+              report.append("  ❌ [Parte 2] Falta la etiqueta <link rel=\"stylesheet\" href=\"styles.css\"> en el <head>.")
+
+          # Verificar que NO existan estilos inline ni etiquetas <style> sueltas
+          has_style_tag = soup.find("style") is not None
+          has_inline_style = any(tag.get("style") for tag in soup.find_all(True))
+
+          if not has_style_tag and not has_inline_style:
+              p2 += 5
+          else:
+              report.append("  ❌ [Parte 2] Se detectaron estilos inline (style=\"...\") o etiquetas <style> residuales. Elimínelos.")
+
+          score += p2
+          print(f"2. Integración de CSS con HTML5: {p2}/15 pts")
+
+          # ==========================================
+          # PARTE 3: SELECTOR UNIVERSAL Y RESET (10 PTS)
+          # ==========================================
+          p3 = 0
+          # Buscar selector universal '*'
+          if re.search(r"\*\s*\{[^}]*\}", css_content):
+              p3 += 10
+          else:
+              report.append("  ❌ [Parte 3] Falta la regla con el selector universal (*) para el reset general.")
+
+          score += p3
+          print(f"3. Selector Universal y Reset: {p3}/10 pts")
+
+          # ==========================================
+          # PARTE 4: SELECTORES DE CLASE (25 PTS)
+          # ==========================================
+          p4 = 0
+          # Buscar clases en CSS (.nombreClase)
+          css_classes = set(re.findall(r"\.([a-zA-Z0-9_-]+)\s*\{", css_content))
+          
+          # Buscar clases usadas en HTML
+          html_classes = set()
+          for tag in soup.find_all(True):
+              if tag.get("class"):
+                  html_classes.update(tag.get("class"))
+
+          classes_matched = css_classes.intersection(html_classes)
+
+          if len(classes_matched) >= 3:
+              p4 += 25
+          else:
+              report.append(f"  ❌ [Parte 4] Se requieren al menos 3 clases definidas en CSS y aplicadas en HTML. Coincidencias encontradas: {len(classes_matched)}.")
+
+          score += p4
+          print(f"4. Selectores de Clase: {p4}/25 pts")
+
+          # ==========================================
+          # PARTE 5: SELECTORES DE ID (25 PTS)
+          # ==========================================
+          p5 = 0
+          # Buscar IDs en CSS (#nombreId)
+          css_ids = set(re.findall(r"#([a-zA-Z0-9_-]+)\s*\{", css_content))
+
+          # Buscar IDs en HTML
+          html_ids = set(tag.get("id") for tag in soup.find_all(True) if tag.get("id"))
+
+          ids_matched = css_ids.intersection(html_ids)
+
+          if len(ids_matched) >= 3:
+              p5 += 25
+          else:
+              report.append(f"  ❌ [Parte 5] Se requieren al menos 3 IDs definidos en CSS e integrados en HTML. Coincidencias encontradas: {len(ids_matched)}.")
+
+          score += p5
+          print(f"5. Selectores de ID: {p5}/25 pts")
+
+          # ==========================================
+          # PARTE 6: AGRUPACIÓN Y REGLAS GENERALES (15 PTS)
+          # ==========================================
+          p6 = 0
+          # Buscar selector de agrupación (coma entre selectores antes de '{')
+          if re.search(r"[a-zA-Z0-9_#.-]+\s*,\s*[a-zA-Z0-9_#.-]+\s*\{", css_content):
+              p6 += 10
+          else:
+              report.append("  ❌ [Parte 6] Falta al menos un selector de agrupación en CSS (ejemplo: h1, h2, h3 { ... }).")
+
+          # Verificar regla para imágenes
+          if re.search(r"img\s*\{[^}]*\}", css_content):
+              p6 += 5
+          else:
+              report.append("  ❌ [Parte 6] Falta la regla de estilo para el selector de tipo 'img'.")
+
+          score += p6
+          print(f"6. Selector de Agrupación y Ajustes: {p6}/15 pts")
+
+          # ==========================================
+          # VERIFICACIÓN ANTI-PLAGIO 
+          # ==========================================
+          student_actor = os.environ.get("GITHUB_ACTOR", "desconocido")
+
+          print("\n🛡️ Conectando para validación anti-plagio...")
+          
+          # Firma combinada: Estructura HTML + Secuencia de Selectores CSS
+          html_tags = "-".join([tag.name for tag in soup.find_all(True)])
+          css_selectors = "-".join(re.findall(r"([^{]+)\{", css_content))
+          combined_structure = f"HTML:{html_tags}|CSS:{css_selectors}".replace(" ", "").replace("\n", "")
+          
+          html_hash = hashlib.sha256(combined_structure.encode("utf-8")).hexdigest()
+
+          try:
+              url_get = f"{SUPABASE_URL}/rest/v1/entregas_css?hash_estructura=eq.{html_hash}"
+              req_get = urllib.request.Request(
+                  url_get,
+                  headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
+              )
+              with urllib.request.urlopen(req_get) as response:
+                  matches = json.loads(response.read().decode("utf-8"))
+
+              es_copia = any(m.get("estudiante") != student_actor for m in matches)
+
+              if es_copia:
+                  autor_original = next(m.get("estudiante") for m in matches if m.get("estudiante") != student_actor)
+                  print(f"🚨 ALERTA DE PLAGIO DETECTADA: Estructura HTML/CSS idéntica a la de '{autor_original}'.")
+
+                  try:
+                      data_plagio = json.dumps({
+                          "estudiante_infractor": student_actor,
+                          "estudiante_original": autor_original,
+                          "hash_estructura": html_hash
+                      }).encode("utf-8")
+
+                      req_log = urllib.request.Request(
+                          f"{SUPABASE_URL}/rest/v1/alertas_plagio_css",
+                          data=data_plagio,
+                          headers={
+                              "apikey": SUPABASE_KEY,
+                              "Authorization": f"Bearer {SUPABASE_KEY}",
+                              "Content-Type": "application/json",
+                              "Prefer": "return=minimal"
+                          },
+                          method="POST"
+                      )
+                      with urllib.request.urlopen(req_log) as _:
+                          pass
+                      print("📌 Incidencia registrada en la tabla 'alertas_plagio_css' de Supabase.")
+                  except Exception as err_log:
+                      print("❌ Error al guardar log en alertas_plagio_css:", err_log)
+
+                  report.append(f"  ❌ [PLAGIO DETECTADO] Estructura HTML/CSS idéntica al entregado por: {autor_original}")
+                  score = 0
+              else:
+                  post_data = json.dumps({"estudiante": student_actor, "hash_estructura": html_hash}).encode("utf-8")
+                  req_post = urllib.request.Request(
+                      f"{SUPABASE_URL}/rest/v1/entregas_css",
+                      data=post_data,
+                      headers={
+                          "apikey": SUPABASE_KEY,
+                          "Authorization": f"Bearer {SUPABASE_KEY}",
+                          "Content-Type": "application/json",
+                          "Prefer": "return=minimal"
+                      },
+                      method="POST"
+                  )
+                  with urllib.request.urlopen(req_post) as _:
+                      pass
+                  print(f"✅ Firma de laboratorio registrada exitosamente para '{student_actor}'.")
+
+          except Exception as err_sp:
+              print("❌ ERROR DE CONEXIÓN A SUPABASE:", err_sp)
+
+          # ==========================================
+          # RESULTADO FINAL Y DESGLOSE
+          # ==========================================
+          print("\n------------------------------------------")
+          print(f"📊 CALIFICACIÓN FINAL: {score} / 100 PTS")
+          print("------------------------------------------\n")
+
+          if report:
+              print("📌 Observaciones por corregir:")
+              for msg in report:
+                  print(msg)
+              print("\n")
+
+          if score < 71:
+              print("❌ EVALUACIÓN FALLIDA: Puntaje menor a 71 pts (Mínimo requerido para aprobar).")
+              sys.exit(1)
+
+          print("🎉 ¡FELICITACIONES! Laboratorio aprobado exitosamente.")
+          sys.exit(0)
+          EOF
+
+      - name: 5. Ejecutar Evaluacion
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: python evaluate.py
